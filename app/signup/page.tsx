@@ -66,7 +66,7 @@ export default function SignupPage() {
         toast.success('Account created successfully!');
         router.push(role === 'company' ? '/company' : '/student');
       }
-    } catch (error) {
+    } catch {
       toast.error('Something went wrong');
     } finally {
       setLoading(false);
@@ -92,7 +92,7 @@ export default function SignupPage() {
                   : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
               }`}
             >
-              I'm a Student
+              I&apos;m a Student
             </button>
             <button
               type="button"
@@ -103,7 +103,7 @@ export default function SignupPage() {
                   : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
               }`}
             >
-              I'm a Company
+              I&apos;m a Company
             </button>
           </div>
 
@@ -187,7 +187,7 @@ export default function SignupPage() {
                     value={formData.description}
                     onChange={handleChange}
                     placeholder="Brief description about your company"
-                    className="w-full px-4 py-2.5 border border-slate-300 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent min-h-[100px]"
+                    className="w-full px-4 py-2.5 bg-white text-slate-900 placeholder:text-slate-400 border border-slate-300 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent min-h-[100px]"
                   />
                 </div>
               </>

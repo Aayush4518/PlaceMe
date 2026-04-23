@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useAuth } from '@/components/AuthContext';
 import { useRouter } from 'next/navigation';
-import { GraduationCap, Building2, LogOut, User } from 'lucide-react';
+import { GraduationCap, LogOut, User } from 'lucide-react';
 
 export default function Navbar() {
   const { user, setUser } = useAuth();

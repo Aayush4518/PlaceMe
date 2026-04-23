@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/components/AuthContext';
 import Input from '@/components/Input';
@@ -40,7 +40,6 @@ export default function CompanyDashboard() {
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editingJob, setEditingJob] = useState<Job | null>(null);
-  const [selectedJob, setSelectedJob] = useState<Job | null>(null);
   const [formData, setFormData] = useState({
     title: '',
     location: '',
@@ -50,6 +49,29 @@ export default function CompanyDashboard() {
     skills: '',
     deadline: ''
   });
+  const companyProfile = user?.profile && 'companyName' in user.profile ? user.profile : null;
+
+  const fetchJobs = useCallback(async () => {
+    try {
+      const res = await fetch(`/api/jobs?companyId=${companyProfile?._id}`);
+      const data = await res.json();
+      setJobs(data.jobs || []);
+    } catch (error) {
+      console.error('Error fetching jobs:', error);
+    } finally {
+      setLoading(false);
+    }
+  }, [companyProfile?._id]);
+
+  const fetchApplications = useCallback(async () => {
+    try {
+      const res = await fetch(`/api/applications?companyId=${companyProfile?._id}`);
+      const data = await res.json();
+      setApplications(data.applications || []);
+    } catch (error) {
+      console.error('Error fetching applications:', error);
+    }
+  }, [companyProfile?._id]);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -64,29 +86,7 @@ export default function CompanyDashboard() {
       fetchJobs();
       fetchApplications();
     }
-  }, [user]);
-
-  const fetchJobs = async () => {
-    try {
-      const res = await fetch(`/api/jobs?companyId=${user?.profile?._id}`);
-      const data = await res.json();
-      setJobs(data.jobs || []);
-    } catch (error) {
-      console.error('Error fetching jobs:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const fetchApplications = async () => {
-    try {
-      const res = await fetch(`/api/applications?companyId=${user?.profile?._id}`);
-      const data = await res.json();
-      setApplications(data.applications || []);
-    } catch (error) {
-      console.error('Error fetching applications:', error);
-    }
-  };
+  }, [user, fetchJobs, fetchApplications]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -96,8 +96,8 @@ export default function CompanyDashboard() {
       const payload = {
         ...formData,
         skills: formData.skills.split(',').map(s => s.trim()).filter(Boolean),
-        companyId: user?.profile?._id,
-        companyName: user?.profile?.companyName
+        companyId: companyProfile?._id,
+        companyName: companyProfile?.companyName
       };
 
       const url = editingJob ? `/api/jobs/${editingJob._id}` : '/api/jobs';
@@ -129,7 +129,7 @@ export default function CompanyDashboard() {
         deadline: ''
       });
       fetchJobs();
-    } catch (error) {
+    } catch {
       toast.error('Something went wrong');
     } finally {
       setLoading(false);
@@ -159,7 +159,7 @@ export default function CompanyDashboard() {
         toast.success('Job deleted');
         fetchJobs();
       }
-    } catch (error) {
+    } catch {
       toast.error('Failed to delete job');
     }
   };
@@ -178,7 +178,7 @@ export default function CompanyDashboard() {
         <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="text-2xl font-bold text-slate-900">Company Dashboard</h1>
-            <p className="text-slate-600">Welcome back, {user.profile?.companyName}</p>
+            <p className="text-slate-600">Welcome back, {companyProfile?.companyName}</p>
           </div>
           <Button onClick={() => { setShowForm(true); setEditingJob(null); setFormData({ title: '', location: '', salary: '', type: 'Full-time', description: '', skills: '', deadline: '' }); }}>
             <Plus className="w-4 h-4 mr-2" />

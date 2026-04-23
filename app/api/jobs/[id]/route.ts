@@ -1,14 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
-import dbConnect from '@/lib/dbConnect';
-import JobListing from '@/models/JobListing';
+import { localStore } from '@/lib/localStore';
 
 export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    await dbConnect();
     const { id } = await params;
     const body = await req.json();
 
-    const job = await JobListing.findByIdAndUpdate(id, body, { new: true });
+    const job = await localStore.updateJob(id, body);
     if (!job) {
       return NextResponse.json({ error: 'Job not found' }, { status: 404 });
     }
@@ -22,10 +20,9 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
 
 export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    await dbConnect();
     const { id } = await params;
 
-    const job = await JobListing.findByIdAndDelete(id);
+    const job = await localStore.deleteJob(id);
     if (!job) {
       return NextResponse.json({ error: 'Job not found' }, { status: 404 });
     }

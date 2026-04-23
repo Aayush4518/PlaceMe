@@ -1,17 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
-import dbConnect from '@/lib/dbConnect';
-import User from '@/models/User';
-import StudentProfile from '@/models/StudentProfile';
-import CompanyProfile from '@/models/CompanyProfile';
+import { localStore } from '@/lib/localStore';
 import { compare } from 'bcryptjs';
 
 export async function POST(req: NextRequest) {
   try {
-    await dbConnect();
     const body = await req.json();
     const { email, password } = body;
 
-    const user = await User.findOne({ email });
+    const user = await localStore.findUserByEmail(email);
     if (!user) {
       return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
     }
@@ -23,9 +19,9 @@ export async function POST(req: NextRequest) {
 
     let profile = null;
     if (user.role === 'student') {
-      profile = await StudentProfile.findOne({ userId: user._id });
+      profile = await localStore.findStudentProfileByUserId(user._id);
     } else if (user.role === 'company') {
-      profile = await CompanyProfile.findOne({ userId: user._id });
+      profile = await localStore.findCompanyProfileByUserId(user._id);
     }
 
     return NextResponse.json({

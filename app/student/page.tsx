@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/components/AuthContext';
 import Select from '@/components/Select';
@@ -44,22 +44,7 @@ export default function StudentDashboard() {
     location: ''
   });
 
-  useEffect(() => {
-    if (!authLoading && !user) {
-      router.push('/login');
-    } else if (user && user.role !== 'student') {
-      router.push('/company');
-    }
-  }, [user, authLoading, router]);
-
-  useEffect(() => {
-    if (user) {
-      fetchJobs();
-      fetchMyApplications();
-    }
-  }, [user, filters]);
-
-  const fetchJobs = async () => {
+  const fetchJobs = useCallback(async () => {
     try {
       const params = new URLSearchParams();
       if (filters.search) params.append('search', filters.search);
@@ -74,9 +59,9 @@ export default function StudentDashboard() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [filters]);
 
-  const fetchMyApplications = async () => {
+  const fetchMyApplications = useCallback(async () => {
     try {
       const res = await fetch(`/api/applications?studentId=${user?.profile?._id}`);
       const data = await res.json();
@@ -84,7 +69,22 @@ export default function StudentDashboard() {
     } catch (error) {
       console.error('Error fetching applications:', error);
     }
-  };
+  }, [user?.profile?._id]);
+
+  useEffect(() => {
+    if (!authLoading && !user) {
+      router.push('/login');
+    } else if (user && user.role !== 'student') {
+      router.push('/company');
+    }
+  }, [user, authLoading, router]);
+
+  useEffect(() => {
+    if (user) {
+      fetchJobs();
+      fetchMyApplications();
+    }
+  }, [user, fetchJobs, fetchMyApplications]);
 
   const handleApply = async (job: Job) => {
     try {
@@ -108,7 +108,7 @@ export default function StudentDashboard() {
 
       toast.success('Application submitted!');
       fetchMyApplications();
-    } catch (error) {
+    } catch {
       toast.error('Something went wrong');
     }
   };
@@ -142,7 +142,7 @@ export default function StudentDashboard() {
                 placeholder="Search jobs by title, company, or description..."
                 value={filters.search}
                 onChange={(e) => setFilters({ ...filters, search: e.target.value })}
-                className="w-full pl-10 pr-4 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                className="w-full pl-10 pr-4 py-2.5 bg-white text-slate-900 placeholder:text-slate-400 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
               />
             </div>
             <Select
@@ -239,7 +239,7 @@ export default function StudentDashboard() {
             <h2 className="text-lg font-semibold text-slate-900 mb-4">My Applications</h2>
             {myApplications.length === 0 ? (
               <Card className="text-center py-8">
-                <p className="text-sm text-slate-500">You haven't applied to any jobs yet</p>
+                <p className="text-sm text-slate-500">You haven&apos;t applied to any jobs yet</p>
               </Card>
             ) : (
               <div className="space-y-3">

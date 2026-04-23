@@ -1,30 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
-import dbConnect from '@/lib/dbConnect';
-import JobListing from '@/models/JobListing';
+import { localStore } from '@/lib/localStore';
 
 export async function GET(req: NextRequest) {
   try {
-    await dbConnect();
     const { searchParams } = new URL(req.url);
     const type = searchParams.get('type');
     const location = searchParams.get('location');
     const search = searchParams.get('search');
     const companyId = searchParams.get('companyId');
 
-    let query: any = {};
-
-    if (type) query.type = type;
-    if (location) query.location = { $regex: location, $options: 'i' };
-    if (search) {
-      query.$or = [
-        { title: { $regex: search, $options: 'i' } },
-        { companyName: { $regex: search, $options: 'i' } },
-        { description: { $regex: search, $options: 'i' } }
-      ];
-    }
-    if (companyId) query.companyId = companyId;
-
-    const jobs = await JobListing.find(query).sort({ createdAt: -1 });
+    const jobs = await localStore.findJobs({ type, location, search, companyId });
     return NextResponse.json({ jobs });
   } catch (error) {
     console.error('Get jobs error:', error);
@@ -34,11 +19,10 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
-    await dbConnect();
     const body = await req.json();
     const { companyId, companyName, title, location, salary, type, description, skills, deadline } = body;
 
-    const job = await JobListing.create({
+    const job = await localStore.createJob({
       companyId,
       companyName,
       title,

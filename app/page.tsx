@@ -48,14 +48,14 @@ export default function LandingPage() {
               <Link href="/signup">
                 <button className="group inline-flex items-center justify-center gap-2 px-8 py-4 bg-indigo-600 hover:bg-indigo-700 rounded-xl font-semibold text-lg transition-all hover:scale-105">
                   <GraduationCap className="w-5 h-5" />
-                  I'm a Student
+                  I&apos;m a Student
                   <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                 </button>
               </Link>
               <Link href="/signup">
                 <button className="group inline-flex items-center justify-center gap-2 px-8 py-4 bg-white/10 hover:bg-white/20 border border-white/20 rounded-xl font-semibold text-lg transition-all hover:scale-105">
                   <Building2 className="w-5 h-5" />
-                  I'm a Company
+                  I&apos;m a Company
                 </button>
               </Link>
             </div>

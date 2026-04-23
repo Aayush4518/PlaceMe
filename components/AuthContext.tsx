@@ -1,13 +1,29 @@
 'use client';
 
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { createContext, useContext, useState, ReactNode } from 'react';
+
+interface StudentProfile {
+  _id: string;
+  userId: string;
+  college: string;
+  degree: string;
+  skills: string[];
+}
+
+interface CompanyProfile {
+  _id: string;
+  userId: string;
+  companyName: string;
+  website?: string;
+  description?: string;
+}
 
 interface User {
   id: string;
   name: string;
   email: string;
   role: 'student' | 'company';
-  profile: any;
+  profile: StudentProfile | CompanyProfile | null;
 }
 
 interface AuthContextType {
@@ -18,17 +34,23 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
+function getStoredUser() {
+  if (typeof window === 'undefined') return null;
 
-  useEffect(() => {
-    const stored = localStorage.getItem('placeme_user');
-    if (stored) {
-      setUser(JSON.parse(stored));
-    }
-    setLoading(false);
-  }, []);
+  const stored = localStorage.getItem('placeme_user');
+  if (!stored) return null;
+
+  try {
+    return JSON.parse(stored) as User;
+  } catch {
+    localStorage.removeItem('placeme_user');
+    return null;
+  }
+}
+
+export function AuthProvider({ children }: { children: ReactNode }) {
+  const [user, setUser] = useState<User | null>(getStoredUser);
+  const loading = false;
 
   const handleSetUser = (newUser: User | null) => {
     setUser(newUser);

@@ -36,7 +36,7 @@ export default function LoginPage() {
       setUser(data.user);
       toast.success('Welcome back!');
       router.push(data.user.role === 'company' ? '/company' : '/student');
-    } catch (error) {
+    } catch {
       toast.error('Something went wrong');
     } finally {
       setLoading(false);
@@ -75,7 +75,7 @@ export default function LoginPage() {
           </form>
 
           <p className="text-center text-slate-600 mt-6">
-            Don't have an account?{' '}
+            Don&apos;t have an account?{' '}
             <Link href="/signup" className="text-indigo-600 hover:text-indigo-700 font-medium">
               Sign up
             </Link>
